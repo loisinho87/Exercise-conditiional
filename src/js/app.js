@@ -1,65 +1,83 @@
 import "../style/index.css";
 
-/**
- *  EDIT ONLY INSIDE THIS RENDER FUNCTION
- *  This function is called every time the user changes types or changes any input
- * 
-    {
-        includeCover: true, // if includeCover is true the algorithm should show the cover image
-        background: "https://images.unsplash.com/photo-1511974035430-5de47d3b95da", // this is the image's url that will be used as a background for the profile cover
-        avatarURL: "https://randomuser.me/api/portraits/women/42.jpg", // this is the url for the profile avatar
-        socialMediaPosition: "right", // social media bar position (left or right)
-        
-        twitter: null, // social media usernames
-        github: null,
-        linkedin: null,
-        instagram: null,
+//Crear un HTML dinámicamente usando las variables proporcionadas
 
-        name: null,
-        lastName: null,
-        role: null,
-        country: null,
-        city: null
-    }
- */
 function render(variables = {}) {
-  console.log("These are the current variables: ", variables); // print on the console
-  // here we ask the logical questions to make decisions on how to build the html
-  // if includeCover==false then we reset the cover code without the <img> tag to make the cover transparent.
+  console.log("These are the current variables: ", variables); // imprimir en la consola
+  // aquí hacemos las preguntas lógicas para tomar decisiones sobre cómo construir el html
+
+  // Lógica para mostrar o no la portada
   let cover = `<div class="cover"><img src="${variables.background}" /></div>`;
+
+  /* interpolación de variables: ${variables.background} forma de insertar el valor de una variable dentro de una cadena de texto.
+  Por ejemplo, si variables.background es "https://images.unsplash.com/photo-1511974035430-5de47d3b95da */
+
+  // si includeCover==false entonces restablecemos el código de portada sin la etiqueta <img> para que la portada sea transparente.
   if (variables.includeCover == false) cover = "<div class='cover'></div>";
 
-  // reset the website body with the new html output
-  document.querySelector("#widget_content").innerHTML = `<div class="widget">
-            ${cover}
-          <img src="${variables.avatarURL}" class="photo" />
-          <h1>Lucy Boilett</h1>
-          <h2>Web Developer</h2>
-          <h3>Miami, USA</h3>
-          <ul class="position-right">
-            <li><a href="https://twitter.com/4geeksacademy"><i class="fab fa-twitter"></i></a></li>
-            <li><a href="https://github.com/4geeksacademy"><i class="fab fa-github"></i></a></li>
-            <li><a href="https://linkedin.com/school/4geeksacademy"><i class="fab fa-linkedin"></i></a></li>
-            <li><a href="https://instagram.com/4geeksacademy"><i class="fab fa-instagram"></i></a></li>
-          </ul>
-        </div>
-    `;
+  // Lógica para crear los enlaces de redes sociales. Solo se agregan los enlaces de redes sociales si el nombre de usuario correspondiente está presente.
+  let socialMediaLinks = "";
+  if (variables.twitter) {
+    socialMediaLinks += `<li><a href="https://twitter.com/${variables.twitter}"><i class="fab fa-twitter"></i></a></li>`;
+  }
+  if (variables.github) {
+    socialMediaLinks += `<li><a href="https://github.com/${variables.github}"><i class="fab fa-github"></i></a></li>`;
+  }
+  if (variables.linkedin) {
+    socialMediaLinks += `<li><a href="https://linkedin.com/in/${variables.linkedin}"><i class="fab fa-linkedin"></i></a></li>`;
+  }
+  if (variables.instagram) {
+    socialMediaLinks += `<li><a href="https://instagram.com/${variables.instagram}"><i class="fab fa-instagram"></i></a></li>`;
+  }
+
+  // Lógica para la posición de la barra de redes sociales, eliminamos null
+
+  let socialMediaPositionClass =
+    variables.socialMediaPosition === "left"
+      ? "position-left"
+      : "position-right";
+
+  // Lógica para el nombre completo
+  let fullName =
+    (variables.name ? variables.name : "") +
+    " " +
+    (variables.lastName ? variables.lastName : "");
+
+  // Lógica para la ciudad y el país
+  let location =
+    (variables.city ? variables.city : "") +
+    (variables.city && variables.country ? ", " : "") +
+    (variables.country ? variables.country : "");
+
+  /* Genera el HTML dinámicamente y se inserta en el elemento con el ID widget_content, incluyendo la portada, la imagen de avatar, el nombre completo, el rol, la ubicación y los enlaces de las redes sociales, todo según las variables proporcionadas. */
+  document.querySelector("#widget_content").innerHTML = `
+    <div class="widget">
+      ${cover}
+      <img src="${variables.avatarURL}" class="photo" /> 
+      <h1>${fullName}</h1>
+      <h2>${variables.role ? variables.role : ""}</h2>
+      <h3>${location}</h3>
+      <ul class="${socialMediaPositionClass}"> 
+        ${socialMediaLinks}
+      </ul>
+    </div>
+  `;
 }
 
 /**
- * Don't change any of the lines below, here is where we do the logic for the dropdowns
+ * No cambie ninguna de las líneas siguientes, aquí es donde hacemos la lógica para los menús desplegables.
  */
 window.onload = function() {
   window.variables = {
-    // if includeCover is true the algorithm should show the cover image
+    // Si includeCover es verdadero, el algoritmo debería mostrar la imagen de portada.
     includeCover: true,
-    // this is the image's url that will be used as a background for the profile cover
+    //esta es la URL de la imagen que se utilizará como fondo para la portada del perfil.
     background: "https://images.unsplash.com/photo-1511974035430-5de47d3b95da",
-    // this is the url for the profile avatar
+    // esta es la URL del avatar del perfil
     avatarURL: "https://randomuser.me/api/portraits/women/42.jpg",
-    // social media bar position (left or right)
+    // Posición de la barra de redes sociales (izquierda o derecha).
     socialMediaPosition: "position-left",
-    // social media usernames
+    // nombres de usuario de redes sociales
     twitter: null,
     github: null,
     linkedin: null,
@@ -70,12 +88,14 @@ window.onload = function() {
     country: null,
     city: null
   };
-  render(window.variables); // render the card for the first time
+  render(window.variables); // Rederiza por primera vez
 
   document.querySelectorAll(".picker").forEach(function(elm) {
     elm.addEventListener("change", function(e) {
-      // <- add a listener to every input
-      const attribute = e.target.getAttribute("for"); // when any input changes, collect the value
+      // <- Añadir un listener a cada input
+      const attribute = e.target.getAttribute("for"); //obtiene el nombre de la propiedad del objeto variables que debe actualizarse.
+
+      //crea un objeto values donde la clave es el valor de attribute y el valor es el nuevo valor del elemento de entrada
       let values = {};
       values[attribute] =
         this.value == "" || this.value == "null"
@@ -85,7 +105,14 @@ window.onload = function() {
           : this.value == "false"
           ? false
           : this.value;
-      render(Object.assign(window.variables, values)); // render again the card with new values
+      render(Object.assign(window.variables, values)); //La función render se encarga de generar el HTML dinámicamente.
     });
   });
 };
+
+/*Este código realiza las siguientes acciones:
+-Selecciona todos los elementos con la clase picker.
+-Añade un event listener de tipo change (cambio) a cada elemento.
+-Obtiene el atributo for del elemento que cambió.
+-Actualiza el valor correspondiente en el objeto values.
+-Llama a la función render con el objeto window.variables actualizado con los nuevos valores.*/
